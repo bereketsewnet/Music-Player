@@ -58,8 +58,8 @@ class _SongPageState extends State<SongPage> {
                           borderRadius: BorderRadius.circular(12),
                           child: Image.asset(currentSong.albumArtImagePath),
                         ),
-                         Padding(
-                          padding: EdgeInsets.all(15.0),
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -76,7 +76,7 @@ class _SongPageState extends State<SongPage> {
                                   Text(currentSong.artistName),
                                 ],
                               ),
-                             const Icon(
+                              const Icon(
                                 Icons.favorite,
                                 color: Colors.red,
                               ),
@@ -89,15 +89,19 @@ class _SongPageState extends State<SongPage> {
                   const SizedBox(height: 25),
                   Column(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 25),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('0:00'),
-                            Icon(Icons.shuffle),
-                            Icon(Icons.repeat),
-                            Text('0:00'),
+                            Text(
+                              formatedTime(value.currentDuration),
+                            ),
+                            const Icon(Icons.shuffle),
+                            const Icon(Icons.repeat),
+                            Text(
+                              formatedTime(value.totalDuration),
+                            ),
                           ],
                         ),
                       ),
@@ -110,9 +114,19 @@ class _SongPageState extends State<SongPage> {
                         child: Slider(
                           min: 0,
                           max: 100,
-                          value: 50,
+                          value: 78,
                           activeColor: Colors.green,
-                          onChanged: (value) {},
+                          onChanged: (double double) {
+                            // dring when the user slide around
+                          },
+                          onChangeEnd: (double double) {
+                            // sliding has finished, go to that postiton in song duration
+                            value.seek(
+                              Duration(
+                                seconds: double.toInt(),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -123,7 +137,9 @@ class _SongPageState extends State<SongPage> {
                       // skip previous
                       Expanded(
                         child: GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            value.playPreviousSong();
+                          },
                           child: const NeuBox(
                             child: Icon(
                               Icons.skip_previous,
@@ -136,10 +152,12 @@ class _SongPageState extends State<SongPage> {
                       Expanded(
                         flex: 2,
                         child: GestureDetector(
-                          onTap: () {},
-                          child: const NeuBox(
+                          onTap: () {
+                            value.pauseOrPlay();
+                          },
+                          child: NeuBox(
                             child: Icon(
-                              Icons.play_arrow,
+                              value.isPlaying ? Icons.pause : Icons.play_arrow,
                             ),
                           ),
                         ),
@@ -148,7 +166,9 @@ class _SongPageState extends State<SongPage> {
 
                       Expanded(
                         child: GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            value.playNextSong();
+                          },
                           child: const NeuBox(
                             child: Icon(
                               Icons.skip_next,
@@ -165,5 +185,13 @@ class _SongPageState extends State<SongPage> {
         );
       },
     );
+  }
+
+  String formatedTime(Duration duration) {
+    String twoDigitSecond =
+        duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    String formattedTime = "${duration.inMinutes}:$twoDigitSecond";
+
+    return formattedTime;
   }
 }
